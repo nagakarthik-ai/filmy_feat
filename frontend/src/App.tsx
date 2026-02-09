@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
 import './index.css';
 
 const BASE_URL = import.meta.env.BASE_URL;
@@ -36,6 +37,171 @@ function App() {
       element.scrollIntoView({ behavior: 'smooth' });
       setMobileMenuOpen(false);
     }
+  };
+
+  const generateTermsPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+    let y = 20;
+
+    const addPage = () => {
+      doc.addPage();
+      y = 20;
+    };
+
+    const checkPageBreak = (needed: number) => {
+      if (y + needed > doc.internal.pageSize.getHeight() - 20) {
+        addPage();
+      }
+    };
+
+    const addTitle = (text: string) => {
+      checkPageBreak(20);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text(text, pageWidth / 2, y, { align: 'center' });
+      y += 10;
+    };
+
+    const addSubtitle = (text: string) => {
+      checkPageBreak(12);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(text, pageWidth / 2, y, { align: 'center' });
+      y += 12;
+    };
+
+    const addSectionHeading = (text: string) => {
+      checkPageBreak(16);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(text, margin, y);
+      y += 8;
+    };
+
+    const addBullet = (text: string) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(`• ${text}`, maxWidth - 5);
+      checkPageBreak(lines.length * 6);
+      doc.text(lines, margin + 5, y);
+      y += lines.length * 6;
+    };
+
+    const addParagraph = (text: string) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      checkPageBreak(lines.length * 6);
+      doc.text(lines, margin, y);
+      y += lines.length * 6 + 4;
+    };
+
+    // Title
+    addTitle('FILMY FEAT FILM FESTIVAL');
+    addSubtitle('Terms & Conditions — 2026 Edition');
+    y += 6;
+
+    // Divider line
+    doc.setDrawColor(200, 150, 50);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    // 1. Eligibility
+    addSectionHeading('1. Eligibility');
+    addBullet('The filmmaker or director must be aged 15 years or above.');
+    addBullet('Short films must be between 1 and 20 minutes in duration, including all credits.');
+    addBullet('Films may be in any Indian language or English. English subtitles are mandatory.');
+    addBullet('Non-dialogue films are accepted.');
+    addBullet('Documentaries, AI-generated films, and animated films are not accepted.');
+    y += 4;
+
+    // 2. Submission & Rights
+    addSectionHeading('2. Submission & Rights');
+    addBullet('By submitting a film, the filmmaker agrees to all FilmyFeat terms and conditions.');
+    addBullet('The submitter must own all rights to the film, including music, SFX, VFX, DI, and all other elements.');
+    addBullet('The submission form must be completed online with a Google Drive link or equivalent document link to the film.');
+    addBullet('Films may be shot on any camera, including mobile devices, provided they support standard YouTube video formats.');
+    addBullet('The submitter cannot withdraw the submission after registration.');
+    addBullet('The same film must not be registered more than once. Multiple different films may be submitted.');
+    addBullet('The submitted film must not be uploaded to YouTube or any other streaming platform, even after the final results are announced.');
+    addBullet('No banner registration or censor certificate is required.');
+    y += 4;
+
+    // 3. Registration Fees
+    addSectionHeading('3. Registration Fees');
+    addBullet('Free — 13 February to 30 July 2026');
+    addBullet('Early Bird — Rs.99 — 31 July to 30 September 2026');
+    addBullet('Regular — Rs.299 — 1 October to 31 October 2026');
+    addBullet('Late Entry — Rs.499 — 1 November to 20 November 2026');
+    addBullet('Entry fee: Rs.100 per head (non-refundable).');
+    addBullet('All registration fees are non-refundable under any circumstances.');
+    addBullet('Upon registration, a confirmation message will be sent within 1-2 days and the filmmaker will be added to the official FilmyFeat WhatsApp group.');
+    y += 4;
+
+    // 4. Content Guidelines
+    addSectionHeading('4. Content Guidelines');
+    addBullet('Films may be of any genre. However, filmmakers are advised to avoid excessive violence, alcohol or cigarette consumption, content supporting rape, pornography, drugs, politics, or any illegal activities.');
+    addBullet('All films must adhere to YouTube\'s terms of service and community guidelines, as selected films will be uploaded on YouTube.');
+    y += 4;
+
+    // 5. Judging Criteria
+    addSectionHeading('5. Judging Criteria');
+    addParagraph('All films are judged equally based on the following criteria:');
+    addBullet('Content Originality — quality of storyline, screenplay, and script.');
+    addBullet('Production — camera work, lighting, and shot composition.');
+    addBullet('Post-Production — editing, transitions, pacing, continuity, and flow.');
+    addBullet('Image — focus, color, and lighting quality.');
+    y += 4;
+
+    // 6. Selection & Notifications
+    addSectionHeading('6. Selection & Notifications');
+    addBullet('Filmmakers will be notified only if their film is officially selected.');
+    addBullet('Official selection and winners lists will be published on the FilmyFeat website and social media channels.');
+    addBullet('Only award winners will receive individual email notifications.');
+    addBullet('Award nominations will be announced on 1 December 2026.');
+    addBullet('Final winners will be announced exclusively during the offline award ceremony in Chennai on 20 December 2026.');
+    y += 4;
+
+    // 7. Screening & Awards
+    addSectionHeading('7. Screening & Awards');
+    addBullet('The festival will be held offline in Chennai, with screenings and an awards ceremony.');
+    addBullet('Certificates will be provided to officially selected participants only.');
+    addBullet('All prizes, awards, and certificates will be distributed offline at the event.');
+    addBullet('Nominated films will be uploaded exclusively on the FilmyFeat YouTube channel.');
+    addBullet('Once selected or nominated, films cannot be removed from the FilmyFeat YouTube channel, even after the festival concludes or if the film does not win an award.');
+    y += 4;
+
+    // 8. Promotional Rights
+    addSectionHeading('8. Promotional Rights');
+    addBullet('FilmyFeat reserves the right to use trailers, teasers, film posters, stills, or behind-the-scenes footage for promotional purposes.');
+    y += 4;
+
+    // 9. Disqualification & Disputes
+    addSectionHeading('9. Disqualification & Disputes');
+    addBullet('If any fraudulent activities or copyright issues are discovered, FilmyFeat reserves the right to disqualify the short film, even after selection.');
+    addBullet('FilmyFeat may withdraw or revoke selections or awards if rules or eligibility criteria are violated.');
+    addBullet('FilmyFeat may reject any film without assigning reasons if rules are not followed.');
+    addBullet('The decision of the jury and festival committee is final and not subject to correspondence.');
+    addBullet('Legal action against jury members and organizers is not permitted.');
+    addBullet('Violation of any rules or regulations will result in a strict ban from the film festival.');
+    y += 8;
+
+    // Footer
+    checkPageBreak(16);
+    doc.setDrawColor(200, 150, 50);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.text('© 2026 Filmy Feat Film Festival. All rights reserved.', pageWidth / 2, y, { align: 'center' });
+    y += 5;
+    doc.text('Contact: filmyfeatofficial@gmail.com | +91 97033 04824', pageWidth / 2, y, { align: 'center' });
+
+    doc.save('FilmyFeat-Terms-and-Conditions-2026.pdf');
   };
 
   const fadeInUp = {
@@ -472,9 +638,9 @@ function App() {
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeInUp}
           >
-            <a href={`${BASE_URL}filmy-feat-terms.pdf`} download className="btn btn-primary">
+            <button onClick={generateTermsPDF} className="btn btn-primary">
               Download Full Terms (PDF)
-            </a>
+            </button>
           </motion.div>
         </div>
       </section>
@@ -870,9 +1036,9 @@ function App() {
               </ul>
 
               <div className="terms-download">
-                <a href="/filmy-feat-terms.pdf" download className="btn btn-primary">
+                <button onClick={generateTermsPDF} className="btn btn-primary">
                   Download Full Terms (PDF)
-                </a>
+                </button>
               </div>
             </div>
           </div>
